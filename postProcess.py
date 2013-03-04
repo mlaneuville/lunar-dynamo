@@ -1,4 +1,5 @@
 import numpy as np
+import makePlots as p
 import os
 
 dir = '../out/'
@@ -17,7 +18,11 @@ for file in os.listdir(dir):
 		rimax = '%5.2f' % ri[-1]
 
 		imin = np.nonzero(B)[0][0]
-		imax = imin + np.nonzero(B[imin:]==0)[0][0]
+		dynamo = np.nonzero(B[imin:]==0)
+		if len(dynamo[0]) != 0:
+			imax = imin + np.nonzero(B[imin:]==0)[0][0]
+		else:
+			imax = len(B)-1
 		B_avg = '%5.2f' % (sum(B[imin:imax])/(imax-imin))
 		tmin =	'%5.2f' % (4.5-t[imin])
 		tmax =	'%5.2f' % (4.5-t[imax])
@@ -31,4 +36,6 @@ for file in os.listdir(dir):
 		str.append(B_avg)
 		str.append(status)
 
-		print str
+		if float(B_avg) > 1.0 and status == False:
+			print str
+			p.makeRunPlots(str[3])

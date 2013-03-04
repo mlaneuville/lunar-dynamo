@@ -174,7 +174,7 @@ def timeEvolution():
 			dT = dist_m
 			#Qcmb[i] = (1-dQ)*Qcmb[i] # Qcmb is already 'per second'
 			t[i] = t[i] + dt*dQ/(1e9*365*24*3600.0)
-			T0 = Tsol(0,0.0)/m.exp(Rc**2/D**2)
+			T0 = Tsol(0,0.0)/m.exp(Rc**2/D**2)-1e-4
 			#print 'done secular only'
 			continue
 

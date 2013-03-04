@@ -12,7 +12,7 @@ def makeRunPlots(run_id):
 
 	prefix = run_id+'_'
 
-	[t,Qcmb,inner,diss,B] = np.loadtxt(filename,unpack=True)
+	[t,Qcmb,inner,diss,B,comp] = np.loadtxt(filename,unpack=True)
 
 	p.figure(figsize=(3.34,2.56), dpi=300)
 	p.plot(t,B,'k',linewidth=2)

@@ -75,7 +75,7 @@ def timeEvolution():
 			T0 = Tcm
 	
 	Qcmb[0] = Qcmb[1]
-	dt = (t[-1]-t[-2])*1e9*365*24*3600.0
+	#dt = (t[-1]-t[-2])*1e9*365*24*3600.0
 	
 	
 	
@@ -128,33 +128,12 @@ def timeEvolution():
 	
 	# dissipation term (see Nimmo09's table 1)
 	def E_phi(f,dTc):
-		global G,rho,Mc,drho,D,delta,T0,dt,k, LH
-		a = 3*m.pi*G*rho*Mc*factor(f)*drho*D**2/(delta-1)/T0**2*dTc/dt
-		b = Mc*12*k*Rc**2/(5*rho*D**4)
-		c = 1.5*Mc*f*(1-f**2)*LH*dTc/dt/((delta-1)*T0**2)
-		return a+c-b
-	
-	
-	### STEP 3 ###
-	#
-	# evolution calculations
-	#
-	E = (Tad(T0,0)-Tsol(0,0))*Q_secular()
-	j = 0
-	while E > Qcmb[j]*dt:
-		T0 = T0 - Qcmb[j]*dt/Q_secular()
-		E = E - Qcmb[j]*dt
-		j = j + 1 
-	
-	# cooling until Tad(0)=Tsol(0,0) needs to be taken into account
-	# TODO: effect on time not actually taken into account yet
-	dQ = (Tad(T0,0.0)-Tsol(0.0,0.0))*Q_secular()/Qcmb[j]/dt
-	Qcmb[j] = Qcmb[j]*(1-dQ)
-	t[j] = t[j] + 0.05*dQ
-	if dQ > 1:
-		print "dQ>1; warning: should not have happened"
-	
-	T0 = Tsol(0,0.0)/m.exp(Rc**2/D**2)
+		global G,rho,Mc,drho,D,delta,T0,dt,k,LH,cp,Rc
+		g = 3*m.pi*G*rho*Mc*factor(f)*drho*D**2/(delta-1)/T0**2*dTc/dt
+		l = 1.5*Mc*f*(1-f**2)*LH*dTc/dt/((delta-1)*T0**2)
+		s = Mc*cp*2*Rc**2/(5*D**2*T0)*dTc/dt
+		adiabat = Mc*12*k*Rc**2/(5*rho*D**4)
+		return s+g+l-adiabat
 	
 	# function to solve to obtain ri at a given timestep
 	def calcInnerCore(ri):
@@ -162,34 +141,62 @@ def timeEvolution():
 		T = T0-dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
 		return Tsol(ri,ri)-Tad(T,ri)
 	
+	### STEP 3 ###
+	#
+	# evolution calculations
+	#
+	
 	# start of the evolution loop
 	inner = np.linspace(0,0,len(t))
-	c = np.linspace(0,0,len(t))
+	c = np.linspace(X0,X0,len(t))
 	diss = np.linspace(0,0,len(t))
 	B = np.linspace(0,0,len(t))
-	
-	for i in range(len(t)-j):
-		Qc = Qcmb[j+i]
-		ri = fsolve(calcInnerCore,0)
-		dTemp = dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
-		# dissipation = E_phi*T/Voc
-		diss[j+i] = E_phi(ri/Rc,dTemp)*Tad(T0-dTemp,ri)/(4*m.pi*(Rc**3-ri**3)/3)
-		if diss[j+i] > 0:
-			# scaling law from Aubert & Christensen 09
-			B[j+i] = fudge*m.pow(rho*mu**3*diss[j+i]**2*(Rc-ri)**2,1./6.)*1e6*(Rc/Rp)**3
-		else:
-			B[j+i] = 0.0
-		if Qc < 0:
+
+	i = 0
+	while i < len(t)-1:
+		Qc = Qcmb[i]
+
+		if Qc < 0.0:
 			print "core warming"
-			ri[0] = inner[j+i-1]
-			diss[j+i] = E_phi(ri/Rc,0)*Tad(T0-dTemp,ri)/(4*m.pi*(Rc**3-ri**3)/3)
-			B[j+i] = 0
-			dTemp = 0
-		T0 = T0-dTemp
-		inner[j+i] = ri[0]
-		c[j+i] = compo(ri[0])
+			ri[0] = inner[i]
+			diss[i+1] = E_phi(ri/Rc,0)*Tad(T0,ri)/(4*m.pi*(Rc**3-ri**3)/3)
+			B[i+1] = 0.0
+			c[i+1] = c[i]
+			i += 1
+			continue
+	
+		dt = (t[i+1]-t[i])*1e9*365*24*3600.0
+		dT = dt*Qc/(Q_secular()+Q_latent(inner[i]/Rc,T0)+Q_compo(inner[i]/Rc,T0))
+		dist_m = Tad(T0,0)-Tsol(0,0)
+
+		if dist_m < dT and dist_m > 0:
+			dQ = dist_m/dT
+			dT = dist_m
+			Qcmb[i] = (1-dQ)*Qcmb[i]
+			t[i] = t[i] + dt*dQ/(1e9*365*24*3600.0)
+			T0 = Tsol(0,0.0)/m.exp(Rc**2/D**2)
+			#print 'done secular only'
+			continue
+
+
+		if dist_m < 0:
+			#print 'crystallizing'
+			ri = fsolve(calcInnerCore,0)
+			dT = dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
+			diss[i+1] = E_phi(ri/Rc,dT)*Tad(T0-dT,ri)/(4*m.pi*(Rc**3-ri**3)/3)
+			if diss[i+1] > 0:
+				# scaling law from Aubert & Christensen 09
+				B[i+1] = fudge*m.pow(rho*mu**3*diss[i+1]**2*(Rc-ri)**2,1./6.)*1e6*(Rc/Rp)**3
+			else:
+				B[i+1] = 0.0
+
+			inner[i+1] = ri[0]
+			c[i+1] = compo(ri[0])
+
+		T0 = T0 - dT
+		i +=1
 
 	f = open(outdat_folder+data_file,'w')
 	for i in range(len(t)):
-		f.write("%5.3e \t %5.3e \t %5.3e \t %5.3e \t %5.3e \n" % (t[i],Qcmb[i],inner[i]/Rc,diss[i],B[i]))
+		f.write("%5.3e \t %5.3e \t %5.3e \t %5.3e \t %5.3e \t %5.3e \n" % (t[i],Qcmb[i],inner[i]/Rc,diss[i],B[i],c[i]))
 	f.close()

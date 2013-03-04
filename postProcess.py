@@ -12,7 +12,7 @@ for file in os.listdir(dir):
 		str.append(spl[1])
 		str.append(spl[2])
 
-		[t,Q,ri,diss,B] = np.loadtxt(dir+file, unpack=True)
+		[t,Q,ri,diss,B,compo] = np.loadtxt(dir+file, unpack=True)
 
 		rimax = '%5.2f' % ri[-1]
 

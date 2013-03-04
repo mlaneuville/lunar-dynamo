@@ -157,8 +157,8 @@ def timeEvolution():
 		Qc = Qcmb[i]
 
 		if Qc < 0.0:
-			print "core warming"
-			ri[0] = inner[i]
+			ri = inner[i]
+			inner[i+1] = ri
 			diss[i+1] = E_phi(ri/Rc,0)*Tad(T0,ri)/(4*m.pi*(Rc**3-ri**3)/3)
 			B[i+1] = 0.0
 			c[i+1] = c[i]
@@ -172,14 +172,14 @@ def timeEvolution():
 		if dist_m < dT and dist_m > 0:
 			dQ = dist_m/dT
 			dT = dist_m
-			Qcmb[i] = (1-dQ)*Qcmb[i]
+			#Qcmb[i] = (1-dQ)*Qcmb[i] # Qcmb is already 'per second'
 			t[i] = t[i] + dt*dQ/(1e9*365*24*3600.0)
 			T0 = Tsol(0,0.0)/m.exp(Rc**2/D**2)
 			#print 'done secular only'
 			continue
 
 
-		if dist_m < 0:
+		if dist_m <= 0:
 			#print 'crystallizing'
 			ri = fsolve(calcInnerCore,0)
 			dT = dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))

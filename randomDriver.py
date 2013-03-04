@@ -39,7 +39,7 @@ for j in range(N):
 	for i,v in enumerate(param_space):
 		if v == 'runs':
 			run = r.sample(param_space[v],1)[0]
-			affix = 'random_%03d' % int(param_space['previous'][run]+1)
+			affix = 'random_%05d' % int(param_space['previous'][run]+1)
 			param_space['previous'][run] += 1
 		elif v == 'previous':
 			continue

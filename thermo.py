@@ -44,6 +44,7 @@ def timeEvolution():
 	
 	indat_folder = '../dat/'
 	outdat_folder = '../out/'
+	debug = 0
 
 	# second order variables (depend on others)
 	D = m.sqrt(3*cp/(2*m.pi*alpha*rho*G))	# scale height (depend on the other parameters actually)
@@ -154,6 +155,8 @@ def timeEvolution():
 
 	i = 0
 	while i < len(t)-1:
+		if debug == 1:
+			print i,t[i],T0,Qcmb[i],inner[i],c[i]
 		Qc = Qcmb[i]
 
 		if Qc < 0.0:
@@ -181,8 +184,11 @@ def timeEvolution():
 
 		if dist_m <= 0:
 			#print 'crystallizing'
-			ri = fsolve(calcInnerCore,0)
+			ri = fsolve(calcInnerCore,Rc/2)
 			dT = dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
+			if dT < 0:
+				print 'halt'
+				print ri,T0,dt,Qc
 			diss[i+1] = E_phi(ri/Rc,dT)*Tad(T0-dT,ri)/(4*m.pi*(Rc**3-ri**3)/3)
 			if diss[i+1] > 0:
 				# scaling law from Aubert & Christensen 09

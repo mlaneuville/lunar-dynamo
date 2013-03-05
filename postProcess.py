@@ -1,6 +1,6 @@
 import numpy as np
 import makePlots as p
-import os
+import os, glob
 
 dir = '../out/'
 for file in os.listdir(dir):
@@ -38,4 +38,6 @@ for file in os.listdir(dir):
 
 		if float(B_avg) > 1.0 and status == False:
 			print str
+			if len(glob.glob1('../fig/',str[3]+"_*.eps")) == 4:
+				continue
 			p.makeRunPlots(str[3])

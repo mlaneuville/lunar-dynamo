@@ -202,7 +202,7 @@ def timeEvolution():
 		T0 = T0 - dT
 		i +=1
 
-	f = open(outdat_folder+data_file,'w')
-	for i in range(len(t)):
-		f.write("%5.3e \t %5.3e \t %5.3e \t %5.3e \t %5.3e \t %5.3e \n" % (t[i],Qcmb[i],inner[i]/Rc,diss[i],B[i],c[i]))
-	f.close()
+	fname = outdat_folder+data_file
+	head = 't, qcmb, inner/Rc, diss, B, c'
+	data = (t,Qcmb,inner/Rc,diss,B,c)
+	np.savetxt(fname, np.column_stack(data), fmt='%5.3e', comments='# ',header= head, delimiter='\t')

@@ -12,7 +12,7 @@ def makeRunPlots(run_id):
 
 	prefix = run_id+'_'
 
-	[t,Qcmb,inner,diss,B,comp] = np.loadtxt(filename,unpack=True)
+	[t,Qcmb,inner,diss,B,comp,Qs,Qg,Ql] = np.loadtxt(filename,unpack=True)
 
 	p.figure(figsize=(3.34,2.56), dpi=300)
 	p.plot(t,B,'k',linewidth=2)
@@ -28,6 +28,7 @@ def makeRunPlots(run_id):
 	
 	p.figure(figsize=(3.34,2.56), dpi=300)
 	p.plot(t,Qcmb,'k',linewidth=2)
+	p.plot(t,Qcmb*0,'k--',linewidth=2)
 	p.xlabel('Time [Ga]')
 	p.ylabel('$Q_{CMB}$ [W]')
 	p.savefig(fig_folder+prefix+'Qcmb.eps', format='eps', bbox_inches='tight')
@@ -38,6 +39,16 @@ def makeRunPlots(run_id):
 	p.xlabel('Time [Ga]')
 	p.ylabel('Dissipation []')
 	p.savefig(fig_folder+prefix+'diss.eps', format='eps', bbox_inches='tight')
+
+	p.figure(figsize=(3.34,2.56), dpi=300)
+	p.plot(t,Qs,linewidth=2)
+	p.plot(t,Qg,linewidth=2)
+	p.plot(t,Ql,linewidth=2)
+	p.xlabel('Time [Ga]')
+	p.ylabel('$Q_{i}$ [W]')
+	p.legend(('Qs','Qg','Ql'),loc='best')
+	p.yscale('log')
+	p.savefig(fig_folder+prefix+'Qi.eps', format='eps', bbox_inches='tight')
 
 def makeCompPlots(*data):
 	import matplotlib.pyplot as p

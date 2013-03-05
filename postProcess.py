@@ -13,7 +13,7 @@ for file in os.listdir(dir):
 		str.append(spl[1])
 		str.append(spl[2])
 
-		[t,Q,ri,diss,B,compo] = np.loadtxt(dir+file, unpack=True)
+		[t,Q,ri,diss,B,compo,Qs,Qg,Ql] = np.loadtxt(dir+file, unpack=True)
 
 		rimax = '%5.2f' % ri[-1]
 
@@ -38,6 +38,6 @@ for file in os.listdir(dir):
 
 		if float(B_avg) > 1.0 and status == False:
 			print str
-			if len(glob.glob1('../fig/',str[3]+"_*.eps")) == 4:
+			if len(glob.glob1('../fig/',str[3]+"_*.eps")) == 5:
 				continue
 			p.makeRunPlots(str[3])

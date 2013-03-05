@@ -152,6 +152,9 @@ def timeEvolution():
 	c = np.linspace(X0,X0,len(t))
 	diss = np.linspace(0,0,len(t))
 	B = np.linspace(0,0,len(t))
+	Qsec = np.linspace(0,0,len(t))
+	Qg = np.linspace(0,0,len(t))
+	QL = np.linspace(0,0,len(t))
 
 	i = 0
 	while i < len(t)-1:
@@ -199,10 +202,14 @@ def timeEvolution():
 			inner[i+1] = ri[0]
 			c[i+1] = compo(ri[0])
 
+		Qsec[i+1] = Q_secular()*dT/dt
+		Qg[i+1] = Q_compo(inner[i]/Rc,T0)*dT/dt
+		QL[i+1] = Q_latent(inner[i]/Rc,T0)*dT/dt
+
 		T0 = T0 - dT
 		i +=1
 
 	fname = outdat_folder+data_file
-	head = 't, qcmb, inner/Rc, diss, B, c'
-	data = (t,Qcmb,inner/Rc,diss,B,c)
+	head = 't, qcmb, inner/Rc, diss, B, c, Qsec, Qg, QL'
+	data = (t,Qcmb,inner/Rc,diss,B,c,Qsec,Qg,QL)
 	np.savetxt(fname, np.column_stack(data), fmt='%5.3e', comments='# ',header= head, delimiter='\t')

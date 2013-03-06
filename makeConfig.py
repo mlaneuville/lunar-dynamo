@@ -1,3 +1,4 @@
+from subprocess import call,check_output
 import ConfigParser as p
 import shutil as sh
 import math as m
@@ -9,6 +10,9 @@ def makeConfig(run,affix,Rc=390e3,k=30,alpha=9.2e-5,rho=7019,cp=835,drho=0.05,LH
 	config = p.RawConfigParser()
 	config.add_section('general')
 
+	version = check_output(['hg','parents','--template','{node|short}'])
+
+	config.set('general','version',	version)	# repository version at run time
 	config.set('general','run',			run)			# run to study
 	config.set('general','Rp',			1740e3)				# lunar radius
 	config.set('general','G',				6.67e-11)			# gravity constant

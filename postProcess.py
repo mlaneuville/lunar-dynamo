@@ -4,6 +4,9 @@ import ConfigParser as c
 import os, glob
 
 dir = '../out/'
+main = c.RawConfigParser()
+main.read('main.cfg')
+
 stats = dict()
 stats['TWP0LW'] = dict()
 stats['TWP0LD'] = dict()
@@ -54,7 +57,9 @@ for file in os.listdir(dir):
 			config = c.RawConfigParser()
 			config.read('../out/'+str[3]+'.cfg')
 			for item in params:
-				stats[str[1]][item].append(float(config.get('normalized',item)))
+				value = config.getfloat('general',item)-main.getfloat('var_min',item)
+				value /= (main.getfloat('var_max',item) - main.getfloat('var_min',item))
+				stats[str[1]][item].append(value)
 				
 			if len(glob.glob1('../fig/',str[3]+"_*.eps")) == 5:
 				continue

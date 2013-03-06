@@ -1,5 +1,6 @@
 import thermo as t
 import makeConfig as c
+import ConfigParser as p
 import numpy as np
 import math as m
 import random as r
@@ -12,21 +13,23 @@ if len(sys.argv) != 2:
 
 
 N = int(sys.argv[1])
+config = p.RawConfigParser()
+config.read('main.cfg')
 
 param_space = dict()
 
-param_space['runs'] = ['TWP0LB','TWP0LD','AWP0SB']
+param_space['runs'] = ['TWP0LB','TWP0LD','AWP0SB','TWP0LW']
 param_space['previous'] = dict()
 
-param_space['Rc'] = np.linspace(300e3,400e3,11)
-param_space['k'] = np.linspace(30,40,11)
-param_space['alpha'] = np.linspace(5e-5,15e-5,11)
-param_space['rho'] = np.linspace(6000,8000,21)
-param_space['drho'] = np.linspace(0.01,0.10,10)
-param_space['LH'] = np.linspace(3e5,7.5e5,10)
-param_space['x0'] = np.linspace(0.01,0.10,10)
-param_space['delta'] = np.linspace(1.01,1.30,30)
-param_space['fudge'] = np.linspace(5e-2,30e-2,11)
+param_space['Rc'] = np.linspace(config.getfloat('var_min','Rc'),config.getfloat('var_max','Rc'),100)
+param_space['k'] = np.linspace(config.getfloat('var_min','k'),config.getfloat('var_max','k'),100)
+param_space['alpha'] = np.linspace(config.getfloat('var_min','alpha'),config.getfloat('var_max','alpha'),100)
+param_space['rho'] = np.linspace(config.getfloat('var_min','rho'),config.getfloat('var_max','rho'),100)
+param_space['drho'] = np.linspace(config.getfloat('var_min','drho'),config.getfloat('var_max','drho'),100)
+param_space['LH'] = np.linspace(config.getfloat('var_min','LH'),config.getfloat('var_max','LH'),100)
+param_space['x0'] = np.linspace(config.getfloat('var_min','x0'),config.getfloat('var_max','x0'),100)
+param_space['delta'] = np.linspace(config.getfloat('var_min','delta'),config.getfloat('var_max','delta'),100)
+param_space['fudge'] = np.linspace(config.getfloat('var_min','fudge'),config.getfloat('var_max','fudge'),100)
 
 for j in param_space['runs']:
 	param_space['previous'][j] = len(glob.glob1('../out/',j+"_random_*.dat"))

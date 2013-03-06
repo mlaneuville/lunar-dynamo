@@ -4,3 +4,4 @@ backup/*
 .DS_Store
 *.pyc
 *.png
+*.eps

@@ -1,0 +1,17 @@
+The routines use the following modules:
+	- makeConfig: ConfigParser, shutil and math
+	- makePlots: matplotlib, numpy, os and sys
+	- postProcess: os, glob, numpy and ConfigParser
+	- randomDriver: numpy, math, random, sys and glob
+	- sequentialDriver: numpy
+	- thermo: ConfigParser, numpy, math and scipy
+
+Data files should be located in '../dat/' and have the following shape: 
+	- Number of timesteps
+	- Thermal conductivity k [W/mK]
+	- Shell thickness dR [m]
+	- t [Ga], Tc [K], Tcmb [K]
+It is used to compute Qcmb(t) = 4*pi*(390e3)^2*k*(Tc-Tcmb)/dR/dt. This will
+be the input for the rest of the code.
+
+

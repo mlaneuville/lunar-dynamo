@@ -72,6 +72,41 @@ def makeCompPlots(*data):
 
 	return
 
+def makeStatPlots(run,data):
+	import matplotlib.pyplot as p
+	import numpy as np
+	print run
+
+	if len(data['k']) == 0:
+		return
+
+	var = []
+	variables = []
+	for item in data.keys():
+		var.append(data[item])
+		variables.append(item)
+
+	fig = p.figure(figsize=(10,6))
+	ax1 = fig.add_subplot(111)
+	p.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
+	bp = p.boxplot(var, notch=0, sym='+', vert=1, whis=1.5)
+	for i in range(len(data.keys())):
+		med = bp['medians'][i]
+		p.plot([np.average(med.get_xdata())], [np.average(var[i])], color='w', marker='*', markeredgecolor='k')
+	p.setp(bp['boxes'], color='black')
+	p.setp(bp['whiskers'], color='black')
+	p.setp(bp['fliers'], color='red', marker='+')
+	ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
+	ax1.set_axisbelow(True)
+	ax1.set_xlabel('Variable parameters',fontsize=14)
+	ax1.set_ylabel('Relative value in range',fontsize=14)
+	xtickNames = p.setp(ax1, xticklabels=variables)
+	p.setp(xtickNames, fontsize=11)
+
+	p.savefig(run)
+
+
+
 import sys
 
 if len(sys.argv) != 1:

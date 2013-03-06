@@ -1,8 +1,21 @@
 import numpy as np
 import makePlots as p
+import ConfigParser as c
 import os, glob
 
 dir = '../out/'
+stats = dict()
+stats['TWP0LW'] = dict()
+stats['TWP0LD'] = dict()
+stats['TWP0LB'] = dict()
+stats['AWP0SB'] = dict()
+params = ['Rc','k','alpha','rho','drho','LH','x0','delta','fudge']
+for item in params:
+	stats['TWP0LW'][item] = []
+	stats['TWP0LD'][item] = []
+	stats['TWP0LB'][item] = []
+	stats['AWP0SB'][item] = []
+
 for file in os.listdir(dir):
 	str = []
 	if file.find('dat') != -1:
@@ -38,6 +51,14 @@ for file in os.listdir(dir):
 
 		if float(B_avg) > 1.0 and status == False:
 			print str
+			config = c.RawConfigParser()
+			config.read('../out/'+str[3]+'.cfg')
+			for item in params:
+				stats[str[1]][item].append(float(config.get('normalized',item)))
+				
 			if len(glob.glob1('../fig/',str[3]+"_*.eps")) == 5:
 				continue
 			p.makeRunPlots(str[3])
+
+for i in stats.keys():
+	p.makeStatPlots(i,stats[i])

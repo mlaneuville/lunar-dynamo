@@ -81,12 +81,13 @@ def makeStatPlots(run,data):
 		return
 
 	var = []
-	variables = []
+	variables = ['$k$','$\Delta$','$L_H$','$\\rho$','$R_c$','$\\alpha$','$\chi_0$','$f$','$\Delta \\rho/\\rho$']
 	for item in data.keys():
 		var.append(data[item])
-		variables.append(item)
+#		variables.append(item)
 
-	fig = p.figure(figsize=(10,6))
+	fig = p.figure(figsize=(6.68,2.56), dpi=300)
+
 	ax1 = fig.add_subplot(111)
 	p.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
 	bp = p.boxplot(var, notch=0, sym='+', vert=1, whis=1.5)
@@ -98,12 +99,13 @@ def makeStatPlots(run,data):
 	p.setp(bp['fliers'], color='red', marker='+')
 	ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
 	ax1.set_axisbelow(True)
+	ax1.set_title('Stats over '+str(len(var[0]))+' successful models')
 	ax1.set_xlabel('Variable parameters',fontsize=14)
 	ax1.set_ylabel('Relative value in range',fontsize=14)
 	xtickNames = p.setp(ax1, xticklabels=variables)
 	p.setp(xtickNames, fontsize=11)
 
-	p.savefig(run)
+	p.savefig(run+'.eps', format='eps', bbox_inches='tight')
 
 
 

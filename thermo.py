@@ -65,12 +65,13 @@ def timeEvolution():
 	data = np.loadtxt(filename,skiprows=3)
 	t = np.linspace(0,0,len(data))
 	Qcmb = np.linspace(0,0,len(data))
+	k_mantle = 4
 	
 	for i,row in enumerate(data):
 		t[i] = row[0]
 		Tcm = row[1]
 		Tm = row[2]
-		Q = k*(Tcm-Tm)/dR*4*m.pi*Rc**2
+		Q = k_mantle*(Tcm-Tm)/(dR/2)*4*m.pi*Rc**2
 		Qcmb[i] = Q
 		if i==0:
 			T0 = Tcm

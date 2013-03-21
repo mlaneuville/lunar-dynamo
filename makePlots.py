@@ -107,6 +107,29 @@ def makeStatPlots(run,data):
 
 	p.savefig(run+'.eps', format='eps', bbox_inches='tight')
 
+def makeTempComparison(run):
+	import matplotlib.pyplot as p
+	from matplotlib import rcParams
+	import numpy as np
+
+	rcParams['font.sans-serif']='Arial'
+	rcParams['font.size']='7'
+	fig_folder = '../fig/'
+	file1 = '../dat/TWP0LB.dat'
+	file2 = '../out/Tcore.dat'
+
+	[t,Tcm,Tm] = np.loadtxt(file1,unpack=True,skiprows=3)
+	[t,Tcore] = np.loadtxt(file2,unpack=True)
+
+	p.figure(figsize=(3.34,2.56), dpi=300)
+
+	p.plot(t[:-1],Tcm[:-1],linewidth=2)
+	p.plot(t[:-1],Tcore[:-1],linewidth=2)
+	p.legend(('GAIA','Corrected'),loc='best')
+	p.xlabel('Time [Ga]')
+	p.ylabel('Core Temp [K]')
+
+	p.savefig(fig_folder+'comparison.eps', format='eps', bbox_inches='tight')
 
 
 import sys
@@ -114,3 +137,4 @@ import sys
 if len(sys.argv) != 1:
 	run_id = sys.argv[1]
 	makeRunPlots(run_id)
+	makeTempComparison(run_id)

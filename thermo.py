@@ -148,6 +148,7 @@ def timeEvolution():
 	#
 	
 	# start of the evolution loop
+	Tcore = np.linspace(T0,T0,len(t))
 	inner = np.linspace(0,0,len(t))
 	c = np.linspace(X0,X0,len(t))
 	diss = np.linspace(0,0,len(t))
@@ -158,8 +159,9 @@ def timeEvolution():
 
 	i = 0
 	while i < len(t)-1:
+		Tcore[i] = T0
 		if debug == 1:
-			print i,t[i],T0,Qcmb[i],inner[i],c[i]
+			print i,t[i],T0,Tcore[i],Qcmb[i],inner[i],c[i]
 		Qc = Qcmb[i]
 
 		if Qc < 0.0:
@@ -213,3 +215,4 @@ def timeEvolution():
 	head = 't, qcmb, inner/Rc, diss, B, c, Qsec, Qg, QL'
 	data = (t,Qcmb,inner/Rc,diss,B,c,Qsec,Qg,QL)
 	np.savetxt(fname, np.column_stack(data), fmt='%5.3e', comments='# ',header= head, delimiter='\t')
+	np.savetxt(outdat_folder+'/Tcore.dat', np.column_stack((t,Tcore)), fmt='%5.3e', comments='# ',header= head, delimiter='\t')

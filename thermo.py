@@ -213,7 +213,6 @@ def timeEvolution():
 		i +=1
 
 	fname = outdat_folder+data_file
-	head = 't, qcmb, inner/Rc, diss, B, c, Qsec, Qg, QL'
-	data = (t,Qcmb,inner/Rc,diss,B,c,Qsec,Qg,QL)
+	head = 't, qcmb, Tcore, inner/Rc, diss, B, c, Qsec, Qg, QL'
+	data = (t,Qcmb,Tcore,inner/Rc,diss,B,c,Qsec,Qg,QL)
 	np.savetxt(fname, np.column_stack(data), fmt='%5.3e', comments='# ',header= head, delimiter='\t')
-	np.savetxt(outdat_folder+'/Tcore.dat', np.column_stack((t,Tcore)), fmt='%5.3e', comments='# ',header= head, delimiter='\t')

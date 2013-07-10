@@ -5,10 +5,10 @@ def readConfig(filename):
 
 	global run, Rc, Rp, G, mu, k, alpha, rho, cp, drho, LH
 	global Tm0, Tm1, Tm2, alphac, P0, X0, Xmax, delta, fudge
-	global data_file
+	global data_file, rho0, rhos0, alphad
 
-	data_file = filename[:-4]+'.dat'
 	run = config.get('general','run')
+	data_file = run+'.dat'
 
 	Rc = float(config.get('general','Rc'))
 	Rp = float(config.get('general','Rp'))
@@ -24,11 +24,15 @@ def readConfig(filename):
 	Tm1 = float(config.get('general','Tm1'))
 	Tm2 = float(config.get('general','Tm2'))
 	alphac = float(config.get('general','alphac'))
+	alphad = float(config.get('general','alphad'))
 	P0 = float(config.get('general','P0'))
 	X0 = float(config.get('general','X0'))
 	Xmax = float(config.get('general','Xmax'))
 	delta = float(config.get('general','delta'))
 	fudge = float(config.get('general','fudge'))
+
+	rho0 = rho
+	rhos0 = 7.5e3
 
 
 def timeEvolution():
@@ -44,7 +48,7 @@ def timeEvolution():
 	
 	indat_folder = '../dat/'
 	outdat_folder = '../out/'
-	debug = 0
+	debug = 1
 
 	# second order variables (depend on others)
 	D = m.sqrt(3*cp/(2*m.pi*alpha*rho*G))	# scale height (depend on the other parameters actually)
@@ -71,7 +75,7 @@ def timeEvolution():
 		t[i] = row[0]
 		Tcm = row[1]
 		Tm = row[2]
-		Q = k_mantle*(Tcm-Tm)/(dR/2)*4*m.pi*Rc**2
+		Q = k_mantle*(Tcm-Tm)/(dR/2)*4*m.pi*Rc**2/2
 		Qcmb[i] = Q
 		if i==0:
 			T0 = Tcm
@@ -100,7 +104,8 @@ def timeEvolution():
 	# solidus temperature as a function of r and ri (due to light elements)
 	def Tsol(r,ri):
 		global Tm0,alphac,Tm1,Tm2
-		return Tm0*(1-alphac*compo(ri))*(1+Tm1*pres(r)+Tm2*pres(r)**2)
+		return (1-alphac*compo(ri))*(Tm0+Tm1*pres(r))
+		#return Tm0*(1-alphac*compo(ri))*(1+Tm1*pres(r)+Tm2*pres(r)**2)
 	
 	# adiabatic temperature profile
 	def Tad(T0,r):
@@ -143,6 +148,16 @@ def timeEvolution():
 		T = T0-dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
 		return Tsol(ri,ri)-Tad(T,ri)
 	
+	def update_parameters(ri,Tc):
+		global rho0, rhos0, alphac, cp, alpha, G, Tm0 # regular params
+		global rho, drho, D, delta # to be updated
+		rho = rho0 - 4e3*compo(ri)
+		rhos = rhos0 - alphad*1e3*compo(ri)
+		drho = (rhos-rho)/rhos
+		D = m.sqrt(3*cp/(2*m.pi*alpha*rho*G))
+		delta = Tm1*(1-alphac*compo(ri))*rho*cp/(alpha*Tc)
+		print drho
+
 	### STEP 3 ###
 	#
 	# evolution calculations
@@ -160,9 +175,12 @@ def timeEvolution():
 
 	i = 0
 	while i < len(t)-1:
+
+		update_parameters(inner[i],Tcore[i])
+
 		Tcore[i] = T0
 		if debug == 1:
-			print i,t[i],T0,Tcore[i],Qcmb[i],inner[i],c[i]
+			print i,t[i],T0,Tcore[i],Qcmb[i],inner[i]/Rc,c[i]
 		Qc = Qcmb[i]
 
 		if Qc < 0.0:
@@ -187,15 +205,30 @@ def timeEvolution():
 			#print 'done secular only'
 			continue
 
+		import sys
+		import numpy as np
+
 
 		if dist_m <= 0:
 			#print 'crystallizing'
+
+			tmp = np.linspace(0,Rc,100)
+			tmp2 = np.linspace(0,Rc,100)
+			for z in range(len(tmp)):
+				tmp2[z] = calcInnerCore(tmp[z])
+
+			#print tmp
+			#print tmp2
+	
+			#sys.exit()
+
 			ri = fsolve(calcInnerCore,Rc/2)
 			dT = dt*Qc/(Q_secular()+Q_latent(ri/Rc,T0)+Q_compo(ri/Rc,T0))
 			if dT < 0:
 				print 'halt'
 				print ri,T0,dt,Qc
 			diss[i+1] = E_phi(ri/Rc,dT)*Tad(T0-dT,ri)/(4*m.pi*(Rc**3-ri**3)/3)
+			print E_phi(ri/Rc,dT)
 			if diss[i+1] > 0:
 				# scaling law from Aubert & Christensen 09
 				B[i+1] = fudge*m.pow(rho*mu**3*diss[i+1]**2*(Rc-ri)**2,1./6.)*1e6*(Rc/Rp)**3
